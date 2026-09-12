@@ -1,0 +1,27 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "meganeko-workflows",
+  "description": "MeGaNeKo personal agent workflows: coding practices, API contracts, Git hygiene, frontend delivery, and agent operating workflow.",
+  "owner": {
+    "name": "MeGaNeKo"
+  },
+  "plugins": [
+    {
+      "name": "meganeko-ai-workflows",
+      "description": "Portable skills for engineering practice, API contracts, Git hygiene, frontend delivery, and agent operating workflow.",
+      "author": {
+        "name": "MeGaNeKo"
+      },
+      "category": "productivity",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./plugins/meganeko-ai-workflows/skills/coding-practices",
+        "./plugins/meganeko-ai-workflows/skills/api",
+        "./plugins/meganeko-ai-workflows/skills/git-command",
+        "./plugins/meganeko-ai-workflows/skills/frontend-delivery",
+        "./plugins/meganeko-ai-workflows/skills/agent-workflow"
+      ]
+    }
+  ]
+}
