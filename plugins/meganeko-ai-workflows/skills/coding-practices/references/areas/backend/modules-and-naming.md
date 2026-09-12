@@ -53,15 +53,28 @@ InMemoryOrderRepository    <- test fake, same contract
 
 If you cannot name the adapter without the technology prefix, the port is probably leaking technology into its contract.
 
-### Splitting, Applied
+### Splitting And Placement, Applied
+
+The file growth rule, its line threshold, and what it gates are [Core Practices](../../core.md); the cases below are examples, not a restatement.
 
 ```text
 Do not split on line count:
   order.service.ts is 300 lines and cohesive  -> leave it
 
-Do split on responsibility drift:
-  order.service.ts now also renders PDFs and sends email
-  -> OrderService (orchestration)
-     InvoicePdfRenderer (neutral, no order rules)
-     OrderNotifier (outbound seam)
+Do move a function you are rewriting to its owner, even if that owner
+already exists:
+  order.service.ts has calculateTax() being reworked end to end, and
+  tax.service.ts already owns tax rules for the rest of the codebase
+  -> move calculateTax(), with its tests, into tax.service.ts
+
+Do create a new file when no owner fits:
+  order.service.ts has calculateShipping() being reworked end to end, and
+  no existing file owns shipping rules
+  -> move calculateShipping(), with its tests, into shipping.calculator.ts
+
+Do put new responsibility in the owner that fits, not the file already open:
+  order.service.ts is asked to add PDF rendering and email sending
+  -> OrderService keeps orchestration and does not grow to hold them
+     InvoicePdfRenderer (neutral, no order rules) gets the new rendering
+     OrderNotifier (outbound seam) gets the new notification
 ```

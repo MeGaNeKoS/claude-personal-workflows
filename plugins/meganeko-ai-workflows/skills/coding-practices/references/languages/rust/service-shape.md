@@ -42,6 +42,8 @@ Generic parameters propagate into every caller's type signature. When that propa
 
 ## Module Shape
 
-- Split large `lib.rs` files; `lib.rs` exposes intentional APIs and does not contain all implementation.
+- `lib.rs` exposes intentional APIs, so new implementation does not go there. An existing large `lib.rs` is left alone until the user asks for a split.
 - Separate type-heavy modules from behavior when a domain grows. Common names are `model`, `command`, `service`, `ports`, `adapters`, `error`, and `constants`, but follow local project style.
 - Keep domain modules free of web framework types, RPC framework types, database clients, vendor SDK clients, and tracing setup.
+- An inline `#[cfg(test)] mod tests` is fine while the module covers one behavior area and stays under 1000 lines. Either a second behavior area or passing 1000 lines moves the tests to sibling files or `tests/`, split by behavior under test with positive and negative cases apart.
+- Moving a function to its owner along with its tests also means updating the `mod` list and any visibility the move requires. A re-export shim left behind in the old file is not acceptable: it is a barrel that hides ownership, which [TypeScript Module Shape](../typescript/module-shape.md) forbids for the same reason.

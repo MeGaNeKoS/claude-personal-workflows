@@ -9,7 +9,7 @@ Split when one file owns independently changing responsibilities, boundary code 
 - Preserve the same owner when extracting private modules.
 - Keep orchestration at the owner entry point and move cohesive details behind narrow local contracts.
 - Do not split simple markup or deterministic helpers when indirection would hide behavior without creating a stable responsibility.
-- File length, directory size, and file count are review signals only. They do not authorize a split by themselves.
+- File length, directory size, and file count are review signals only. They do not authorize a split by themselves. The file growth rule, including the line threshold, what it gates, and where a reworked function moves, is [Core Practices](../../core.md); this branch does not restate it.
 
 ## Useful View Split Points
 

@@ -9,13 +9,13 @@ Router only. Every rule has exactly one owning file; this one owns none.
 
 ## Scope Test
 
-**Non-trivial** means the change crosses files or owners, introduces a contract or abstraction, or changes state, persistence, transport, framework, or domain behavior.
+**Non-trivial** means the change crosses files or owners, introduces a contract or abstraction, or changes state, persistence, transport, framework, or domain behavior. Adding code to a file already over 1000 lines, or adding a new behavior area to a test file, is also non-trivial.
 
 Anything else is trivial: match repository style, proceed, load nothing. Guidance elsewhere saying "substantial" or "significant" means this definition.
 
 ## Load
 
-1. Non-trivial work always loads [Core Practices](./references/core.md) — universal gates and the change map.
+1. Non-trivial work always loads [Core Practices](./references/core.md), for the universal gates and the change map.
 2. Then every branch matched below. Branches compose. Activating a branch does not load all of it; each index selects its own leaves.
 
 | Branch | Load when |
@@ -26,6 +26,7 @@ Anything else is trivial: match repository style, proceed, load nothing. Guidanc
 | [Svelte](./references/frameworks/svelte/INDEX.md) · [Tonic](./references/frameworks/tonic/INDEX.md) · [SQLx](./references/frameworks/sqlx/INDEX.md) | the framework being used |
 | [HTTP](./references/protocols/http/INDEX.md) · [gRPC](./references/protocols/grpc/INDEX.md) | the wire protocol being defined |
 | [Readability](./references/readability.md) | writing code: naming a value, restructuring a branch, or commenting a decision |
+| [Function Shape](./references/function-shape.md) | writing or reviewing a function: deciding what it needs to run, or splitting a function that mixes decision and effect |
 | [Dependency Management](./references/dependency-management.md) | adding, replacing, or removing a dependency |
 
 Typical compositions: Rust backend service → backend + Rust. Rust gRPC with Tonic → backend + Rust + gRPC + Tonic. Svelte UI → frontend + TypeScript + Svelte. TypeScript backend API → backend + TypeScript + HTTP.

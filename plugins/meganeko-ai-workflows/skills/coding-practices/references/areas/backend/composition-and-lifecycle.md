@@ -8,6 +8,7 @@ Use this reference when wiring runtime dependencies, long-lived clients, reposit
 - Make mandatory dependencies explicit in constructors. Make invalid construction fail early or impossible.
 - Do not create long-lived concrete clients deep inside handlers or services.
 - Construct long-lived clients once at the owning composition seam and pass their contracts explicitly to consumers.
+- A composition root spans layers by design; it is gated on length like any other file, not on what it touches.
 
 ### Applied
 

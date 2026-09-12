@@ -1,6 +1,6 @@
 # Frontend Testing
 
-Use this reference to select verification seams for changed frontend behavior. Test placement follows repository convention; test responsibility follows the production owner.
+Use this reference to select verification seams for changed frontend behavior. Test placement follows repository convention; test responsibility follows the production owner. Convention decides the location only; the test file rule itself belongs to [Core Practices](../../core.md).
 
 | Changed responsibility | Primary evidence |
 | --- | --- |

@@ -18,7 +18,8 @@ Promote only when **all** hold:
 ```text
 Not promotion evidence:
   two files look similar                -> similarity is not shared ownership
-  the file is large                     -> size is a review signal
+  the file is large                     -> size is a review signal, not promotion
+                                            evidence
   the filename is generic               -> a name is not an owner
   the import repeats                    -> duplication is cheaper than a wrong owner
   another consumer may appear           -> predicted reuse is not a consumer
@@ -26,5 +27,7 @@ Not promotion evidence:
 ```
 
 Leaving code feature-local is reversible. Untangling a wrongly-shared owner is not, because every later consumer bends the contract further toward its own needs.
+
+Where new code goes is governed by [Core Practices](../../core.md), not by this table.
 
 Update ownership/import checks and tests when promotion changes a public boundary.

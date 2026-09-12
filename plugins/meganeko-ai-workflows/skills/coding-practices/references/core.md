@@ -45,7 +45,7 @@ The forbidden edge is the point. If the CSV primitive needed to know about invoi
 
 Stop and resolve explicitly if a change requires any of these.
 
-- **Undefined owner.** Every changed responsibility has exactly one named owner before editing. A newly proposed owner is an architecture decision.
+- **Undefined owner.** Every changed responsibility has exactly one named owner before editing. A newly proposed owner is an architecture decision; giving a responsibility the code already has its own file, because none fits, is not one. Moving a responsibility to a module that did not have it is.
 - **Forbidden dependency.** A barrel, alias, callback, context, store, cast, or service locator does not make an inverted edge valid.
 - **Weak promotion.** Promote only to a designated owner with a real production consumer outside the current owner. A generic name, repeated import, large file, or predicted reuse is not evidence.
 - **Lost domain-safe value.** A validated value stays validated through internal layers until a boundary requires conversion. Decode where trust or representation changes, not where a directory is named `api`.
@@ -53,6 +53,6 @@ Stop and resolve explicitly if a change requires any of these.
 - **Hidden dependency.** Replaceable external clients, clocks, and runtime services pass through an explicit contract at the owning composition seam. Do not inject a pure deterministic helper for symmetry.
 - **Missing seam.** Test responsibility reveals the production owner and boundary seam. Add compile-time tests when the type system carries an invariant runtime tests cannot prove.
 
-Split at stable responsibility seams. File size, file count, and directory count are audit signals, not thresholds.
+Split at stable responsibility seams. File size, file count, and directory count are audit signals, not thresholds for splitting existing code. A file over 1000 lines is full regardless of what it holds; that gate applies to additions only, never to splitting or reorganizing what already exists, which waits for the user to ask for it. A small extraction, the function you were already changing, needs no such wait; splitting or reorganizing anything you were not already editing is a sweep. New behavior goes to the seam owner that covers it, existing or new; a fix or small change already there stays put. A function reworked end to end moves to its owner, with its tests and call sites, unless that drags out private state or forces visibility open, then it stays, reason reported. Cohesion decides both ways: one function per file is as wrong as a huge file. A test file is bounded by scope, not length, and full at 1000 lines like any other file: one behavior per file, positive and negative apart, a second area means a second file regardless.
 
 If a change cannot proceed without violating a gate, report the structural conflict rather than routing around it.
