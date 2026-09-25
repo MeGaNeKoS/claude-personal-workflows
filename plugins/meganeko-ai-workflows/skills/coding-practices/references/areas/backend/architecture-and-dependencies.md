@@ -83,3 +83,13 @@ The order limits are product rules, so they belong to the service or domain, whe
 - Do not use a barrel, alias, callback, cast, context, or service locator to conceal a forbidden dependency.
 - Keep production code independent of test code.
 - Stop when a requested edge has no declared owner or violates the dependency graph; resolve ownership explicitly.
+
+## Failure Modes
+
+- State the failure modes a design or brief must cover before implementation: timeout, retry, partial write, crash midway, and dependency down, and the behavior in each case.
+- This is a design question, not a constraint on the order code gets typed in.
+
+## Idempotent Writes
+
+- State how a repeat is detected for anything that writes: a handler, a queue consumer, or a retried outbound call. An idempotency key, an upsert, or a state check are all valid; if none applies, state why the write can't repeat.
+- Reads are exempt.
