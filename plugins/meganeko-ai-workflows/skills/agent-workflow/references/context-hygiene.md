@@ -6,12 +6,12 @@ Compact at clear context-management boundaries. Do not compact after every small
 
 **There is no agent-callable compaction tool.** Claude Code compacts automatically when context grows long, and the user can run `/compact`, optionally with preservation instructions.
 
-So the agent cannot trigger compaction. Its job is to make compaction safe, not to request it. At a boundary identified below:
+So the agent cannot compact. In this file, "request compaction" means these two steps, taken at a boundary identified below:
 
 1. Write the handoff into something durable before context is lost.
 2. Tell the user a `/compact` boundary has been reached, and state what to preserve.
 
-Durable targets, best first: a committed file; a task recorded with `TaskCreate` / `TaskUpdate`; a plan artifact; an explicit summary message in the transcript.
+Durable targets, best first: a committed file or the repository's own tracker; a task recorded with `TaskCreate` / `TaskUpdate`, where the session has those tools; a plan artifact. A summary that exists only in the conversation is not durable, because compaction rewrites it.
 
 Auto-compaction preserves a summary plus remaining context, so work continues across the boundary. Do not wrap up early, truncate scope, or hand off merely because the conversation is long.
 

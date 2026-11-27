@@ -17,11 +17,21 @@ Do not start goal mode just because the task is complex. Propose it only when du
 
 ## Mechanism In Claude Code
 
-Claude Code has no single goal primitive. Assemble the durable tracker from:
+Claude Code has a goal command. The user types `/goal` followed by a condition, and the session keeps working until the condition holds.
 
-- `EnterPlanMode` / `ExitPlanMode` for the understanding gate and approval. `ExitPlanMode` approval **is** the explicit user approval this reference requires before starting. Use `AskUserQuestion` to resolve requirements *before* finalizing the plan; never use it to ask whether the plan is ready, since the user cannot see the plan until `ExitPlanMode`.
-- `TaskCreate` / `TaskUpdate` / `TaskList` for the execution checklist and for status that survives compaction.
-- Committed files and git history for verification evidence.
+- After each turn, a separate small model judges whether the condition is met. It calls no tools and sees only the conversation, so it can judge only evidence that was stated there. Put each check and its result in your reply: a claim with no evidence in the conversation cannot satisfy the condition.
+- The goal clears when the condition is met, when the judge finds it impossible to satisfy, when a turn fails on an error the user has to fix, or when the user runs `/goal clear`. A new `/goal` replaces the active one.
+- A goal that was still active when a session ended is restored when the session is resumed.
+
+`/goal` is the user's to set. Propose the condition text, written so that it can be judged from the conversation: "the test suite passes and its output is shown", not "the feature works".
+
+The goal command holds one condition, not the plan. Keep the rest durable in:
+
+- the repository's own tracker where it has one, such as a `backlog/` folder of tickets;
+- a committed file, for anything that must outlive the session;
+- `TaskCreate` / `TaskUpdate` / `TaskList`, where the session has those tools, for the execution checklist.
+
+`EnterPlanMode` / `ExitPlanMode` serve the understanding gate and approval. `ExitPlanMode` approval **is** the explicit user approval this reference requires before starting. Use `AskUserQuestion` to resolve requirements *before* finalizing the plan; never use it to ask whether the plan is ready, since the user cannot see the plan until `ExitPlanMode`.
 
 Anything held only in conversation history is not durable. Record it.
 
@@ -58,7 +68,7 @@ If the user corrects the understanding, revise it before starting goal mode.
 
 When goal mode is approved:
 
-1. Record the approved objective with `TaskCreate`, and in a committed file when the goal spans sessions.
+1. Record the approved objective in the most durable tracker available, as listed under the mechanism above.
 2. Record acceptance criteria as the working completion standard.
 3. Identify constraints, non-goals, risks, and verification requirements.
 4. Build a concise execution checklist.
@@ -68,7 +78,9 @@ Do not invent project facts from memory.
 
 ## Ownership
 
-The main thread owns product understanding, architecture judgment, acceptance criteria, status, and final completion decisions.
+The user owns the objective, the acceptance criteria, and the decision that the goal is complete. A change to the objective or to a criterion goes to the user.
+
+The main thread owns product understanding, the plan, status, and the evidence that each criterion is met.
 
 Checklists, tools, and subagents may support execution, but they do not replace main-thread judgment.
 
@@ -87,9 +99,11 @@ Keep status concrete. Avoid vague progress language.
 
 ## Completion Rule
 
-Mark a goal complete only when the approved acceptance criteria are met and required verification has passed or been explicitly waived by the user.
+Report a goal as met only when every approved acceptance criterion has a named check and its result, and required verification has passed or been explicitly waived by the user. A criterion you could not exercise is not met: say so.
 
-Do not mark complete merely because:
+Reporting a goal as met does not close it. The user closes it: directly, or through the `/goal` condition they set, which the judge applies to the evidence in the conversation. Mark a ticket or a tracker item done only when the user asks for that item.
+
+Do not report a goal as met merely because:
 
 - implementation is partially done
 - context is low
