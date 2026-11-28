@@ -6,10 +6,10 @@ The detail and examples behind the [Coder Card](./coder-card.md)'s lines on plan
 
 Plan the functions before they exist. A change that adds a function, or changes which function calls which, goes through these five steps in order. A change that stays inside one existing body goes straight to step 5.
 
-1. **Look at what exists.** **Also load** [What Exists](./what-exists.md), and list what your module and the modules it may call already hold. Do not read a long list: filter it by the noun, the thing your function works on. Search by the noun and not the verb, since a planned `loadInvoice` is only found as `fetchInvoice` through `invoice`. Use what is already there, types and constants included: an existing `OrderId` beats a new `string`. The functions your brief names for reuse come first. The project's libraries count too: before writing something a library the project uses might already do, such as routing, a timeout, a retry, or parsing, look it up there. When the library does most of it, wrap the library and add the missing part. Your own version of the whole is a decision: ask before writing it, as [Core Practices](./core.md) says. A reviewer that finds one checks it against the library, and several defects in one own version mean replace it with the wrapper, not patch it.
+1. **Look at what exists.** **Also load** [What Exists](./what-exists.md), and list what your module and the modules it may call already hold. Do not read a long list: filter it by the noun, the thing your function works on. Search by the noun and not the verb, since a planned `loadInvoice` is only found as `fetchInvoice` through `invoice`. Use what is already there, types and constants included: an existing `OrderId` beats a new `string`. The functions your brief names for reuse come first. The project's libraries count too: before writing something a library the project uses might already do, such as routing, a timeout, a retry, or parsing, look it up there. When the library does most of it, wrap the library and add the missing part. Your own version of the whole is a decision: ask before writing it, as [Core Practices](./core.md) says.
 2. **Write the top function first, out of calls.** Write the function the caller needs as a sequence of calls, each named for what that step should do, whether or not the function exists yet. One call per step. Read it back: it is the plan for the change, and if it does not tell the behavior in order, fix the names before going on. Where your brief gives a function plan, take its calls and signatures exactly as given, and send a function that cannot work as written back to the lead unchanged.
 3. **Give every missing function a placeholder.** Each call to a function that does not exist yet gets one: the real signature, with types, and a body that fails loudly. Use an existing type where there is one. Where there is none, define a small named type now, in the file of your own module that owns the concept. A type that belongs in another module is that module's to add, so ask. Then build, type check, or at least load the module, so the plan is checked before any body is written. Then write the tests and see each one fail against the placeholders.
-4. **Fill the placeholders one at a time.** Each body is either a sequence of calls, written the way step 2 says, or one step. When the next line does not belong to the function's name, cut: name that piece, write the call, and give it a placeholder. Fill it right away or after the function you were in. Either order works. After each function, build and run the tests: a test may still fail only at a placeholder not yet filled, and any other failure is fixed before the next function.
+4. **Fill the placeholders one at a time.** Each body is either a sequence of calls, written the way step 2 says, or one step. When the next line does not belong to the function's name, cut: name that piece, write the call, and give it a placeholder. Fill it right away or after the function you were in. Either order works. After each function, build and run only the tests that call it, by test name or by package, never the whole suite: a test may still fail only at a placeholder not yet filled, and any other failure is fixed before the next function. The lint, and the tests of every module the change touched or that depends on one, run once, before the report.
 5. **Check each finished function against its name.** Say what the body does in one sentence. If the sentence needs "and" or "then", or says something the name does not, split the function or rename it. Then apply [The Mixed Function Test](#the-mixed-function-test).
 
 Any one of these is the signal to cut in step 4:
@@ -28,10 +28,11 @@ Any one of these is the signal to cut in step 4:
 
 While the plan stands, a strict build may report that something is unused: a parameter a placeholder does not read, or a function nothing calls yet. Those reports are expected and do not fail the check in step 3. Any other error is a flaw in the plan, so fix it before going on. Never drop a parameter or delete a function to silence an unused report. It goes away when the bodies are written and the top function has its caller.
 
-No placeholder survives the change. Before you report, search every file you changed or created for the marker. One your change added is yours to fill. One that was already there is not part of your change, so leave it. The report lists the functions and types you added and the existing ones you reused, each with its file.
+No placeholder survives the change. Before you report, search every file you changed or created for the marker. One your change added is yours to fill. One that was already there is not part of your change, so leave it.
+
+The example is the plan after steps 2 and 3. The top function is written first, and none of the four functions it calls exists yet. `Edit` already existed. `Limits` did not, so it is defined now, with only the field the plan needs. Each missing function is a typed placeholder, and the package builds, so the compiler has checked the plan.
 
 ```go
-// Step 2: the top function, written first. None of the four functions it calls exists yet.
 func denyOversizedEdit(edit Edit, limits Limits, out io.Writer) error {
 	existing, err := readTarget(edit.Path)
 	if err != nil {
@@ -44,13 +45,10 @@ func denyOversizedEdit(edit Edit, limits Limits, out io.Writer) error {
 	return writeDenial(out, edit.Path, limits)
 }
 
-// Step 3: Edit already existed. Limits did not, so it is defined now,
-// with only the field the plan needs.
 type Limits struct {
 	Allowance int
 }
 
-// Step 3: typed placeholders. The package builds, so the compiler has checked the plan.
 func readTarget(path string) (string, error) { panic("not implemented") }
 
 func countAddedLines(edit Edit, existing string) int { panic("not implemented") }
@@ -69,15 +67,13 @@ Tier a function by what it needs in order to run.
 - **Orchestrate.** Needs the other functions. Calls them in order and passes results along. It may return early on an error, and it may branch on an answer a called function already decided. It holds no product rule of its own: no limit, no eligibility check, no calculation, no comparison of domain values. Testable with fakes at each seam.
 - **Effect.** Needs the outside world. The actual database call, network call, or file read or write, plus turning its failure into the caller's error type, and nothing else.
 
-The placeholders above, filled in:
+Two of the placeholders above, filled in. `exceedsAllowance` is compute: the rule, as values in and a value out. `readTarget` is effect: the outside world, and nothing else.
 
 ```go
-// Compute: the rule, as values in and a value out.
 func exceedsAllowance(addedLines, allowance int) bool {
 	return addedLines > allowance
 }
 
-// Effect: the outside world, and nothing else.
 func readTarget(path string) (string, error) {
 	raw, err := os.ReadFile(path)
 	return string(raw), err

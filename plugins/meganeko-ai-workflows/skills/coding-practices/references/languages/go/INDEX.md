@@ -17,9 +17,11 @@ Use this branch for Go code: error types, test seams, package layout, and domain
 - Avoid global mutable dependencies except deliberate process-level infrastructure.
 - Use named types for domain-sensitive primitives when they prevent mistakes, for example different ID types, duration units, token values, or secret values.
 - Add constructors when validation is needed.
+- A state is a named type with a constant for each value, and one function that returns the next state or an error. A `switch` on it lists every value, and its `default` returns an error.
 - Keep DTO and model definitions in their own file once code outside the package uses them. Do not split tiny packages just to mirror a template.
 - Use constants for domain rules, protocol values, retry limits, timeout values, and validation bounds. Keep constants near the package that owns the rule.
 - Use table tests for behavior with clear input/output cases.
+- `go test` reruns only the packages whose inputs changed and prints the rest as `(cached)`, so a run over the changed packages and their importers costs what the change costs. Never pass `-count=1`: it turns the cache off. While filling functions, run the one package, with `-run` naming the test. Pass `-race` once, in the run before the report.
 
 ```go
 // Wrong: both are strings, so a customer ID passes as an order ID.

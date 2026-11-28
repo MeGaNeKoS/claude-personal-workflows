@@ -11,7 +11,7 @@ Router, plus the Scope Test below. Every other rule has exactly one owning file.
 
 Before any code change, however small, load the [Coder Card](./references/coder-card.md) and work from it. It states every rule for writing code in one line and names the file that owns each. Open an owning file only when a line is unclear or your brief names it.
 
-Reviewing code, and writing a brief or a change map, load the owning files in full: [Readability](./references/readability.md), [Function Shape](./references/function-shape.md), [What Exists](./references/what-exists.md), and [Core Practices](./references/core.md).
+Reviewing code, load the owning files in full: [Readability](./references/readability.md), [Function Shape](./references/function-shape.md), [What Exists](./references/what-exists.md), and [Core Practices](./references/core.md). Writing a brief or a change map, load the last three: the card's lines on names and control flow are enough to plan by.
 
 ## Scope Test
 

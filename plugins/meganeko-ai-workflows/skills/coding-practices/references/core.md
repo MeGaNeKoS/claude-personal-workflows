@@ -2,8 +2,6 @@
 
 Load this for every non-trivial change. It owns who decides structure, the change map, and the universal gates: rules that apply regardless of area, language, framework, or protocol.
 
-This file states rules and one worked artifact. Branch references own the detail, the examples, and everything scoped narrower. Nothing here is restated by a branch.
-
 ## Who Decides
 
 Structure is decided before the code, by whoever holds the whole picture. The coder builds inside it.
@@ -29,12 +27,9 @@ A new file inside an existing module, for a responsibility that module already h
 ## General Engineering
 
 - Match existing repository style and keep changes scoped to the requested behavior before introducing a new convention.
-- Reuse before writing. A function or type that already does the job, in your module or in one it may call, is used and not written again. Looking is the first step of [Function Shape](./function-shape.md).
-- Name domain concepts, protocol values, limits, defaults, and operational constants instead of scattering unexplained primitives. Keep each named value with the owner of the rule it expresses. Obvious indices and arithmetic identities stay inline. Detail in [Readability](./readability.md).
 - Export only what code outside the module uses, in this change or already. Everything else stays private to its file or module.
 - Prefer existing language, platform, framework, and repository primitives over a new library. For a concern the architecture document lists a library for, use that library. A new library is a decision under Who Decides: when the work seems to need one the task did not name, report what it is for and what it would replace, and do not add it.
 - Do not create vague cross-owner buckets such as `utils`, `helpers`, or `common`. Use a named responsibility or a repository-designated neutral primitive family.
-- Write no comments. The two things that stay are in [Readability](./readability.md).
 - Code that runs in only one context (server only, browser only, inside a request, inside a transaction) learns that from one named place, such as a parameter or a single `isServer` module, never from checks scattered through the code.
 
 ## The Change Map
@@ -90,6 +85,9 @@ Stop if a change requires any of these, and resolve it by asking, under Who Deci
 - **Hidden runtime service.** A database, a network client, a clock, a random source, or any other runtime service reaches the code that uses it as an explicit parameter or constructor field, wired in one place. Do not inject a pure deterministic helper for symmetry.
 - **Missing seam.** Each changed responsibility is tested through the seam its change map names, not through private helpers, so the tests show who owns the behavior. Add a compile-time test when the type system carries an invariant a runtime test cannot prove.
 - **Silent failure.** Every error either propagates, or is handled with a stated reason and a structured log carrying context. `.ok()`, `unwrap_or_default()`, `let _ =`, an empty catch, or any other quiet fallback standing in for an error is not a substitute for handling it unless the design states why. A default in place of an error is never improvised.
+- **Implied state.** A thing that moves through stages, such as an order, a job, or a connection, has one state type with named values. One function owns the transitions: it takes the current state and what happened, and returns the next state or a refusal. No other code sets the state, and none works the stage out from a combination of fields, such as an empty timestamp beside a flag: two fields can disagree, one state value cannot. Code that branches on the state names every value, and an unknown value is an error, never a default branch that carries on. A wrong state the code cannot express needs no test to catch it.
+- **Hand-joined text.** Text another parser reads, such as a URL, a query, a file path, a command line, a header, or a row of an export, is built with that format's builder or escaper. A value joined in by hand changes what the text means the day it holds a separator, a quote, or a reserved character, and no test with ordinary values shows it.
+- **One rule, two places.** A product rule, a limit, a message, or a conversion is written once, in the module that owns it, and every other place calls it. A copy drifts: when the rule changes, one place keeps the old one. A second module that needs it gets an edge to the owner, decided under Who Decides, never a copy.
 
 If a change cannot proceed without violating a gate, report the structural conflict rather than routing around it.
 
@@ -101,7 +99,8 @@ If a change cannot proceed without violating a gate, report the structural confl
 - Cohesion decides both ways: one function per file is as wrong as a huge file. A file holds one responsibility, usually several functions that change together.
 - Splitting or reorganizing code you were not already changing is a sweep. It waits for the user to ask: name it in your report and leave it. Extracting the function you were already changing is not a sweep.
 - A test fails when the behavior it protects is removed. Write the test first, against a placeholder where the build needs one, and see it fail; then write the code until it passes. A test that passes before its code exists does not test it. Never break finished code to watch a test fail.
-- A test gives the same result on every run. Where it waits for something to happen, it waits for the event itself, under a limit that fails the test, and never sleeps for a fixed time and assumes the event happened. It releases what it opens on every exit, a failed assertion included.
+- A test gives the same result on every run, alone or with the others: it builds the state it needs and relies on nothing another test left. Where it waits for something to happen, it waits for the event itself, under a limit that fails the test, and never sleeps for a fixed time and assumes the event happened. It releases what it opens on every exit, a failed assertion included.
 - Cases of one behavior that differ only in input and expected result are rows of one test, each row named for its case; positive and negative rows sit in separate tests, each in its own file. A case that needs its own setup or its own assertions is its own test.
+- A test run covers what the change can reach: the code that changed and the code that depends on it. During the work that is the tests that call the function just written. Before the report it is every module changed and every module that depends on one. A change that reaches no code, such as a typo in text nothing parses, runs no test.
 - Code that only tests call lives in the test files. A production file holds nothing that production code never calls.
 - A test file holds one behavior area with every case of it: positive cases in one file, negative cases in a sibling file, and never one file per case. The pair is named `<area>_positive` and `<area>_negative`, in the language's test file form. Parsing a config file is one area; a missing key, a wrong type, and an empty file are cases of it and share the negative file. A second behavior area means a second file, however short the current one is. A test file that reaches 1000 lines splits by sub-behavior, positive and negative still apart. Where a language keeps unit tests inside the source file, its language branch says how this rule applies there.
